@@ -26,7 +26,7 @@
 **Правильная архитектура:**
 - Сервер: `webgui-1.3.0+mc1.21.1.jar` (нативный NeoForge) **активен** в `mods/`
 - Клиент: тот же jar + `mcef-keksuccino-2.2.0-1.21.1-fabric.jar` в лаунчер-паке (`REQUIRED_LOCKED_MODS`)
-- Сервер: Paper-плагин (`WebGuiBridgeService`) отправляет пакеты через `player.sendPluginMessage()` (Bukkit не диспатчит NeoForge-команды — см. P1.1). Токен из `config/webgui/server.json`
+- Сервер: Paper-плагин (`WebGuiBridgeService`) отправляет пакеты через **NeoForge reflection bridge** → `WebviewNetworking.openGui()` → `PacketDistributor.sendToPlayer()`. Fallback: `sendPluginMessage()` если мод не на classpath. Токен подписывается NeoForge модом из `config/webgui/server.json` (см. P1.12)
 - Клиент: нативный NeoForge WebGUI мод получает пакеты по channel ID `webgui:open_web` / `webgui:set_main_menu` и рендерит браузер
 - Каналы зарегистрированы с `.optional()` → handshake всегда проходит без ошибок
 
@@ -815,6 +815,50 @@ displayTest="IGNORE_ALL_VERSION"
 **Файл:** `voidrp_webgui_neoforge/src/main/resources/META-INF/neoforge.mods.toml`
 
 **После фикса:** пересобрать (`./gradlew jar`), задеплоить на сервер и в лаунчер-пак, обновить манифест (`generate_launcher_manifest.py`), перезапустить сервер.
+
+---
+
+#### P1.12 `/shop` не открывает WebGUI — sendPluginMessage не доходит до NeoForge клиента (2026-06-23)
+
+**Статус: РЕШЕНО (2026-06-23)**
+
+**Симптом:** Команда `/shop` выполняется без ошибок, но браузер у клиента не открывается. В логах ничего не было (логирования не существовало).
+
+**Причина:** На Mohist Paper-плагин отправлял пакет через `player.sendPluginMessage()` (Bukkit plugin messaging). NeoForge 1.21.1 на клиенте регистрирует `webgui:open_web` как кастомный payload через `RegisterPayloadHandlersEvent`. Пакет, отправленный через Bukkit plugin messaging, не проходит через NeoForge's `PacketDistributor` и может не быть корректно роутан к зарегистрированному хендлеру клиента.
+
+**Решение:** В `WebGuiBridgeService.java` добавлен reflection-bridge:
+1. Пробуем вызвать `land.webgui.WebviewNetworking.openGui(serverPlayer, url)` через рефлексию — на Mohist NeoForge мод и Paper плагин на одном classpath
+2. `WebviewNetworking.openGui()` использует `PacketDistributor.sendToPlayer()` — корректный NeoForge путь с токен-подписью
+3. Если reflection не удался (мод не загружен) — fallback на `sendPluginMessage` как раньше
+
+```java
+private boolean tryViaForge(Player player, String url, int mode) {
+    try {
+        Object serverPlayer = player.getClass().getMethod("getHandle").invoke(player);
+        Class<?> cls = Class.forName("land.webgui.WebviewNetworking");
+        Class<?> spClass = Class.forName("net.minecraft.server.level.ServerPlayer");
+        cls.getMethod(mode == MODE_GUI ? "openGui" : "openHud", spClass, String.class)
+           .invoke(null, serverPlayer, url);
+        return true;
+    } catch (Exception e) {
+        // fallback to sendPluginMessage
+        return false;
+    }
+}
+```
+
+**Дополнительно:** Добавлено подробное логирование во все ключевые точки:
+- Сервер (NeoForge): `WebviewNetworking.openGui/openHud/openGuiForEntity()` — INFO лог с именем игрока и URL
+- Сервер (NeoForge): `withPlayerToken()` — WARN если секрет не настроен
+- Клиент (NeoForge): `WebGUIClientHandlers.handleOpenPayload()` — INFO при получении пакета, WARN если MCEF не готов
+- Плагин: `WebGuiBridgeService.openGui/sendWebPacket()` — INFO при каждой отправке
+
+**Файлы:**
+- `voidrp_webgui_neoforge/src/main/java/land/webgui/WebviewNetworking.java`
+- `voidrp_webgui_neoforge/src/main/java/land/webgui/WebGUIClientHandlers.java`
+- `voidrp_gamesync_plugin/src/main/java/ru/voidrp/gamesync/service/WebGuiBridgeService.java`
+
+**После фикса:** пересобрать оба мода, задеплоить NeoForge jar на сервер и в лаунчер-пак, горячо перезагрузить плагин (`plugman reload VoidRpGameSync`), обновить манифест. NeoForge jar требует рестарт сервера.
 
 ---
 

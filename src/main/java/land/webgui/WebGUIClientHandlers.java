@@ -19,9 +19,16 @@ public final class WebGUIClientHandlers {
     }
 
     public static void handleOpenPayload(WebviewPayloads.OpenWebS2CPayload payload) {
-        if (payload.protocolVersion() != WebviewNetworking.PROTOCOL_VERSION) return;
+        WebGUIMod.LOGGER.info("[WebGUI] Client received open payload: proto={} mode={} url={}",
+                payload.protocolVersion(), payload.displayMode(), payload.url());
+        if (payload.protocolVersion() != WebviewNetworking.PROTOCOL_VERSION) {
+            WebGUIMod.LOGGER.warn("[WebGUI] Protocol version mismatch: got {} expected {}",
+                    payload.protocolVersion(), WebviewNetworking.PROTOCOL_VERSION);
+            return;
+        }
         Minecraft client = Minecraft.getInstance();
         if (!MCEF.isInitialized()) {
+            WebGUIMod.LOGGER.warn("[WebGUI] MCEF not initialized — cannot open URL: {}", payload.url());
             if (client.player != null) {
                 client.player.sendSystemMessage(Component.translatable("message.webgui.mcef_not_ready"));
             }
@@ -29,9 +36,13 @@ public final class WebGUIClientHandlers {
         }
         String u = payload.url() == null || payload.url().isBlank() ? StartUrls.primary() : payload.url();
         if (payload.displayMode() == WebviewNetworking.MODE_GUI) {
+            WebGUIMod.LOGGER.info("[WebGUI] Opening WebViewScreen: {}", u);
             client.setScreen(new WebViewScreen(u));
         } else if (payload.displayMode() == WebviewNetworking.MODE_HUD) {
+            WebGUIMod.LOGGER.info("[WebGUI] Applying server HUD: {}", u);
             WebHudOverlay.applyServerOpen(client, u);
+        } else {
+            WebGUIMod.LOGGER.warn("[WebGUI] Unknown displayMode: {}", payload.displayMode());
         }
     }
 }

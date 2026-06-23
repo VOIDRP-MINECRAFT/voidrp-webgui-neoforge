@@ -54,18 +54,21 @@ public final class WebviewNetworking {
     }
 
     public static void openGui(ServerPlayer player, String url) {
+        WebGUIMod.LOGGER.info("[WebGUI] openGui → {} : {}", player.getName().getString(), url);
         clearEntityContext(player);
         PacketDistributor.sendToPlayer(player,
                 new WebviewPayloads.OpenWebS2CPayload(PROTOCOL_VERSION, MODE_GUI, withPlayerToken(player, url)));
     }
 
     public static void openHud(ServerPlayer player, String url) {
+        WebGUIMod.LOGGER.info("[WebGUI] openHud → {} : {}", player.getName().getString(), url);
         clearEntityContext(player);
         PacketDistributor.sendToPlayer(player,
                 new WebviewPayloads.OpenWebS2CPayload(PROTOCOL_VERSION, MODE_HUD, withPlayerToken(player, url)));
     }
 
     public static void openGuiForEntity(ServerPlayer player, String url, String entityJson) {
+        WebGUIMod.LOGGER.info("[WebGUI] openGuiForEntity → {} : {}", player.getName().getString(), url);
         sendEntityContext(player, entityJson);
         PacketDistributor.sendToPlayer(player,
                 new WebviewPayloads.OpenWebS2CPayload(PROTOCOL_VERSION, MODE_GUI, withPlayerToken(player, url)));
@@ -91,10 +94,12 @@ public final class WebviewNetworking {
 
     private static String withPlayerToken(ServerPlayer player, String url) {
         if (!WebviewServerConfig.enableTokens()) {
+            WebGUIMod.LOGGER.info("[WebGUI] tokens disabled — sending URL without token");
             return sanitizeUrl(url);
         }
         String token = WebviewSignedToken.create(player);
         if (token.isEmpty()) {
+            WebGUIMod.LOGGER.warn("[WebGUI] token secret not configured — sending URL without token for {}", player.getName().getString());
             return sanitizeUrl(url);
         }
         String withParam = WebviewUrlBuilder.appendQueryParam(url == null ? "" : url, WebviewServerConfig.queryParamName(), token);
