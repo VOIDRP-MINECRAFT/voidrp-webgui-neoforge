@@ -1,0 +1,10 @@
+{
+  "required": false,
+  "package": "land.webgui.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "CefUtilMixin",
+    "McefSettingsMixin"
+  ],
+  "minVersion": "0.8"
+}
