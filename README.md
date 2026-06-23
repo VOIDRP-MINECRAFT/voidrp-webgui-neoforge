@@ -213,7 +213,7 @@ BufferUploader.drawWithShader(buf.buildOrThrow());
 
 | Репо | Связь |
 |---|---|
-| [voidrp-webgui](https://github.com/VOIDRP-MINECRAFT/voidrp-webgui) | Клиентский Fabric-форк (исходники для кастомизации) |
+| ~~[voidrp-webgui](https://github.com/VOIDRP-MINECRAFT/voidrp-webgui)~~ | _(архивирован 2026-06-23 — заменён этим модом)_ |
 | [voidrp-gamesync-plugin](https://github.com/VOIDRP-MINECRAFT/voidrp-gamesync-plugin) | `WebGuiBridgeService` — транспорт пакетов через Bukkit |
 | [voidrp-site](https://github.com/VOIDRP-MINECRAFT/voidrp-site) | Сайт с `/game-ui/*` страницами |
 | [minecraft-backend](https://github.com/VOIDRP-MINECRAFT/minecraft-backend) | API с `webgui_token` авторизацией |
