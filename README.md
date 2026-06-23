@@ -223,5 +223,5 @@ BufferUploader.drawWithShader(buf.buildOrThrow());
 <div align="center">
 <a href="https://void-rp.ru">🌐 Сайт</a> ·
 <a href="https://github.com/VOIDRP-MINECRAFT">🏠 Организация</a> ·
-<a href="https://github.com/VOIDRP-MINECRAFT/.github/blob/main/docs/WEBGUI_ARCHITECTURE.md">📐 WebGUI Architecture</a>
+<a href="WEBGUI_INTEGRATION_PLAN.md">📋 Integration Plan</a>
 </div>
