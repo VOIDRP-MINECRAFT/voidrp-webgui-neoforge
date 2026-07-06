@@ -24,7 +24,16 @@ public final class WebviewClientBridge {
         pendingEntityContextJson = null;
     }
 
+    // Throttle live client-info pushes. Running every client tick (20 Hz) means that
+    // while the player moves, the position changes each tick → dedup misses → an
+    // executeJavaScript() call fires on the (always-on) HUD browser 20×/sec, causing
+    // movement-correlated FPS stutter. Pushing ~3×/sec is plenty for live HUD info.
+    private static final int PUSH_EVERY_TICKS = 7;
+    private static int sinceLastPush = 0;
+
     public static void tick(Minecraft client) {
+        if (++sinceLastPush < PUSH_EVERY_TICKS) return;
+        sinceLastPush = 0;
         tryPush(client, true, false);
     }
 

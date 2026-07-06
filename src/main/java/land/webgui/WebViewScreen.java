@@ -42,6 +42,7 @@ public class WebViewScreen extends Screen {
         guiPageReady = false;
         browser = WebSession.openForGui(initialUrl);
         resizeBrowser();
+        browser.setFocus(true);
     }
 
     private int getBrowserWidth() { return Math.max(1, this.width); }
@@ -125,7 +126,10 @@ public class WebViewScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (browser == null || !isInBrowserBounds(mouseX, mouseY)) return false;
-        browser.sendMousePress(browserLocalMouseX(mouseX), browserLocalMouseY(mouseY), button);
+        int bx = browserLocalMouseX(mouseX);
+        int by = browserLocalMouseY(mouseY);
+        browser.sendMouseMove(bx, by);
+        browser.sendMousePress(bx, by, button);
         browser.setFocus(true);
         return true;
     }
@@ -133,7 +137,10 @@ public class WebViewScreen extends Screen {
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (browser == null) return false;
-        browser.sendMouseRelease(browserLocalMouseX(mouseX), browserLocalMouseY(mouseY), button);
+        int bx = browserLocalMouseX(mouseX);
+        int by = browserLocalMouseY(mouseY);
+        browser.sendMouseMove(bx, by);
+        browser.sendMouseRelease(bx, by, button);
         browser.setFocus(true);
         return true;
     }
