@@ -2,17 +2,15 @@ package land.webgui;
 
 import com.cinemamod.mcef.MCEF;
 import com.cinemamod.mcef.MCEFBrowser;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import land.webgui.render.WebTextureRenderer;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
+/** Полноэкранный браузер (вариант для Minecraft 26.2: extract-рендер и новые input-события). */
 public class WebViewScreen extends Screen {
 
     private static boolean guiPageReady;
@@ -67,8 +65,8 @@ public class WebViewScreen extends Screen {
     }
 
     @Override
-    public void resize(Minecraft p_96575_, int p_96576_, int p_96577_) {
-        super.resize(p_96575_, p_96576_, p_96577_);
+    public void resize(int newWidth, int newHeight) {
+        super.resize(newWidth, newHeight);
         resizeBrowser();
     }
 
@@ -97,50 +95,40 @@ public class WebViewScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         if (browser != null && guiPageReady && browser.isTextureReady()) {
             int texId = browser.getRenderer().getTextureID();
             if (texId != 0) {
-                renderRawTexture(context, texId, getBrowserWidth(), getBrowserHeight());
+                WebTextureRenderer.blitFullTexture(graphics, texId,
+                        this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight(),
+                        getBrowserWidth(), getBrowserHeight());
             }
         }
     }
 
-    private static void renderRawTexture(GuiGraphics context, int texId, int w, int h) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, texId);
-        var buf = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        var mat = context.pose().last().pose();
-        buf.addVertex(mat, 0, h, 0).setUv(0, 1);
-        buf.addVertex(mat, w, h, 0).setUv(1, 1);
-        buf.addVertex(mat, w, 0, 0).setUv(1, 0);
-        buf.addVertex(mat, 0, 0, 0).setUv(0, 0);
-        BufferUploader.drawWithShader(buf.buildOrThrow());
+    @Override
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        // без затемнения — веб-страница занимает весь экран
     }
 
     @Override
-    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float deltaTicks) {
-        // no darkening — web fills the entire screen
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (browser == null || !isInBrowserBounds(mouseX, mouseY)) return false;
-        int bx = browserLocalMouseX(mouseX);
-        int by = browserLocalMouseY(mouseY);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (browser == null || !isInBrowserBounds(event.x(), event.y())) return false;
+        int bx = browserLocalMouseX(event.x());
+        int by = browserLocalMouseY(event.y());
         browser.sendMouseMove(bx, by);
-        browser.sendMousePress(bx, by, button);
+        browser.sendMousePress(bx, by, event.button());
         browser.setFocus(true);
         return true;
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         if (browser == null) return false;
-        int bx = browserLocalMouseX(mouseX);
-        int by = browserLocalMouseY(mouseY);
+        int bx = browserLocalMouseX(event.x());
+        int by = browserLocalMouseY(event.y());
         browser.sendMouseMove(bx, by);
-        browser.sendMouseRelease(bx, by, button);
+        browser.sendMouseRelease(bx, by, event.button());
         browser.setFocus(true);
         return true;
     }
@@ -161,28 +149,28 @@ public class WebViewScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (super.keyPressed(keyCode, scanCode, modifiers)) return true;
+    public boolean keyPressed(KeyEvent event) {
+        if (super.keyPressed(event)) return true;
         if (browser == null) return false;
-        browser.sendKeyPress(keyCode, scanCode, modifiers);
+        browser.sendKeyPress(event.key(), event.scancode(), event.modifiers());
         browser.setFocus(true);
         return true;
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        if (super.keyReleased(keyCode, scanCode, modifiers)) return true;
+    public boolean keyReleased(KeyEvent event) {
+        if (super.keyReleased(event)) return true;
         if (browser == null) return false;
-        browser.sendKeyRelease(keyCode, scanCode, modifiers);
+        browser.sendKeyRelease(event.key(), event.scancode(), event.modifiers());
         browser.setFocus(true);
         return true;
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
-        if (super.charTyped(chr, modifiers)) return true;
+    public boolean charTyped(CharacterEvent event) {
+        if (super.charTyped(event)) return true;
         if (browser == null) return false;
-        browser.sendKeyTyped(chr, modifiers);
+        browser.sendKeyTyped((char) event.codepoint(), 0);
         browser.setFocus(true);
         return true;
     }

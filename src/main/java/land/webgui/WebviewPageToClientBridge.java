@@ -1,5 +1,7 @@
 package land.webgui;
 
+import land.webgui.compat.Compat;
+
 import com.cinemamod.mcef.MCEF;
 import com.cinemamod.mcef.MCEFBrowser;
 import com.google.gson.JsonElement;
@@ -7,7 +9,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import net.minecraft.client.Minecraft;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.browser.CefMessageRouter;
@@ -62,8 +63,8 @@ public final class WebviewPageToClientBridge {
             case "close" -> {
                 Minecraft mc = Minecraft.getInstance();
                 mc.execute(() -> {
-                    if (mc.screen instanceof WebViewScreen) {
-                        mc.screen.onClose();
+                    if (Compat.screen(mc) instanceof WebViewScreen) {
+                        Compat.screen(mc).onClose();
                     } else if (WebHudOverlay.isHudVisible()) {
                         WebHudOverlay.toggleHud(mc);
                     }
@@ -74,7 +75,7 @@ public final class WebviewPageToClientBridge {
                 if (url != null && !url.isBlank()) {
                     final String finalUrl = url;
                     Minecraft mc = Minecraft.getInstance();
-                    mc.execute(() -> mc.setScreen(new WebViewScreen(finalUrl)));
+                    mc.execute(() -> Compat.setScreen(mc, new WebViewScreen(finalUrl)));
                 }
             }
             case "open_hud" -> {
@@ -124,7 +125,7 @@ public final class WebviewPageToClientBridge {
     }
 
     private static void sendToServer(String channel, String jsonPayload) {
-        PacketDistributor.sendToServer(new WebviewPayloads.WebviewPageEventC2SPayload(channel, jsonPayload));
+        Compat.sendToServer(new WebviewPayloads.WebviewPageEventC2SPayload(channel, jsonPayload));
     }
 
     private static void log(String level, String msg) {

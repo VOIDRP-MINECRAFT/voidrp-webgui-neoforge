@@ -1,5 +1,7 @@
 package land.webgui;
 
+import land.webgui.compat.Compat;
+
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -20,7 +22,7 @@ public final class WebviewCommands {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
                 Commands.literal("webgui")
-                        .requires(s -> s.hasPermission(2))
+                        .requires(Compat.opRequirement())
                         .then(Commands.literal("gui")
                                 .then(Commands.argument("targets", EntityArgument.players())
                                         .then(Commands.argument("url", StringArgumentType.greedyString())

@@ -1,14 +1,9 @@
 package land.webgui;
 
+import land.webgui.compat.Compat;
+
 import com.cinemamod.mcef.MCEFBrowser;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 
 public final class WebHudOverlay {
@@ -29,27 +24,27 @@ public final class WebHudOverlay {
 
     public static boolean shouldDeliverHudBrowserInput(Minecraft client) {
         if (client == null || !McefBridge.isMcefInitialized()) return false;
-        if (!hudVisible || !hudInteractive || client.screen != null) return false;
+        if (!hudVisible || !hudInteractive || Compat.screen(client) != null) return false;
         if (WebSession.mode() != WebSession.Mode.HUD_OVERLAY) return false;
         return WebSession.browser() != null;
     }
 
     public static boolean shouldForwardHudArrowKeys(Minecraft client) {
         if (client == null || !McefBridge.isMcefInitialized()) return false;
-        if (!hudVisible || client.screen != null) return false;
+        if (!hudVisible || Compat.screen(client) != null) return false;
         if (hudInteractive) return false;
         if (WebSession.mode() != WebSession.Mode.HUD_OVERLAY) return false;
         return WebSession.browser() != null;
     }
 
     public static boolean shouldBlockVanillaWorldInteractions(Minecraft client) {
-        if (client == null || client.screen != null) return false;
+        if (client == null || Compat.screen(client) != null) return false;
         if (!hudVisible || !hudInteractive) return false;
         return client.level != null;
     }
 
     public static void tickCursor(Minecraft client) {
-        if (client.screen != null) return;
+        if (Compat.screen(client) != null) return;
         if (!hudVisible) {
             if (cursorUnlockedForWebHud) {
                 client.mouseHandler.grabMouse();
@@ -70,8 +65,8 @@ public final class WebHudOverlay {
 
     public static void applyServerOpen(Minecraft client, String url) {
         String u = url == null || url.isBlank() ? StartUrls.primary() : url;
-        if (client.screen != null) {
-            client.setScreen(null);
+        if (Compat.screen(client) != null) {
+            Compat.setScreen(client, null);
         }
         restoreHudAfterGuiClose = false;
         hudVisible = true;
@@ -84,7 +79,7 @@ public final class WebHudOverlay {
     }
 
     public static void toggleHud(Minecraft client) {
-        if (client.screen instanceof WebViewScreen) return;
+        if (Compat.screen(client) instanceof WebViewScreen) return;
         if (!McefBridge.isMcefInitialized()) {
             notifyMcefMissing(client);
             return;
@@ -111,7 +106,7 @@ public final class WebHudOverlay {
 
     public static void toggleInteractive(Minecraft client) {
         if (!McefBridge.isMcefInitialized()) return;
-        if (!hudVisible || client.screen != null) return;
+        if (!hudVisible || Compat.screen(client) != null) return;
         hudInteractive = !hudInteractive;
         if (hudInteractive) {
             client.mouseHandler.releaseMouse();
@@ -160,20 +155,18 @@ public final class WebHudOverlay {
         }
     }
 
-    public static void onRender(GuiGraphics context, float partialTick) {
-        if (!hudVisible) return;
+    /**
+     * Готовый к отрисовке HUD-браузер (или null). Версионные рендер-хуки
+     * берут его отсюда — вся общая логика остаётся здесь.
+     */
+    public static MCEFBrowser renderableHudBrowser(Minecraft client) {
+        if (!hudVisible) return null;
         MCEFBrowser browser = WebSession.hudBrowser();
-        if (browser == null) return;
-        Minecraft client = Minecraft.getInstance();
+        if (browser == null) return null;
         resizeBrowser(client);
-        if (!hudPageReady) return;
-        if (!browser.isTextureReady()) return;
-        int texId = browser.getRenderer().getTextureID();
-        if (texId == 0) return;
-
-        int sw = client.getWindow().getGuiScaledWidth();
-        int sh = client.getWindow().getGuiScaledHeight();
-        renderRawTexture(context, texId, sw, sh);
+        if (!hudPageReady) return null;
+        if (!browser.isTextureReady()) return null;
+        return browser;
     }
 
     public static boolean containsMouse(double mouseX, double mouseY, Minecraft client) {
@@ -199,17 +192,5 @@ public final class WebHudOverlay {
         if (client.player != null) {
             client.player.sendSystemMessage(Component.translatable("message.webgui.mcef_not_ready"));
         }
-    }
-
-    private static void renderRawTexture(GuiGraphics context, int texId, int w, int h) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, texId);
-        var buf = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        var mat = context.pose().last().pose();
-        buf.addVertex(mat, 0, h, 0).setUv(0, 1);
-        buf.addVertex(mat, w, h, 0).setUv(1, 1);
-        buf.addVertex(mat, w, 0, 0).setUv(1, 0);
-        buf.addVertex(mat, 0, 0, 0).setUv(0, 0);
-        BufferUploader.drawWithShader(buf.buildOrThrow());
     }
 }

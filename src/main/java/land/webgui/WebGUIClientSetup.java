@@ -1,6 +1,7 @@
 package land.webgui;
 
-import com.mojang.blaze3d.platform.InputConstants;
+import land.webgui.compat.Compat;
+
 import net.minecraft.client.KeyMapping;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -28,6 +29,7 @@ public final class WebGUIClientSetup {
                     McefBridge.mcefPresent = true;
                     McefSetup.scheduleInit();
                     net.neoforged.neoforge.common.NeoForge.EVENT_BUS.register(new WebGUIClientForgeEvents());
+                    net.neoforged.neoforge.common.NeoForge.EVENT_BUS.register(new WebHudRenderHook());
                 } catch (Throwable t) {
                     WebGUIMod.LOGGER.warn("MCEF mod found but API is incompatible — in-game browser disabled. ({})", t.toString());
                 }
@@ -39,16 +41,9 @@ public final class WebGUIClientSetup {
 
     @SubscribeEvent
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
-        keyMainMenu = new KeyMapping(
-                "key.webgui.main_menu",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_F6,
-                "key.categories.webgui");
-        keyHudInteractive = new KeyMapping(
-                "key.webgui.hud_interactive",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_GRAVE_ACCENT,
-                "key.categories.webgui");
+        Compat.registerKeyCategory(event);
+        keyMainMenu = Compat.keyMapping("key.webgui.main_menu", GLFW.GLFW_KEY_F6);
+        keyHudInteractive = Compat.keyMapping("key.webgui.hud_interactive", GLFW.GLFW_KEY_GRAVE_ACCENT);
         event.register(keyMainMenu);
         event.register(keyHudInteractive);
     }

@@ -1,5 +1,7 @@
 package land.webgui;
 
+import land.webgui.compat.Compat;
+
 import com.cinemamod.mcef.MCEF;
 import com.cinemamod.mcef.MCEFBrowser;
 import com.google.gson.Gson;
@@ -89,7 +91,7 @@ public final class WebviewClientBridge {
         o.addProperty("playerUuid",  player.getUUID().toString());
         o.addProperty("username",    player.getName().getString());
         o.addProperty("webviewMode", WebSession.mode().name());
-        o.addProperty("dimension",   player.level().dimension().location().toString());
+        o.addProperty("dimension",   Compat.dimensionId(player.level()));
 
         JsonObject pos = new JsonObject();
         pos.addProperty("x", player.getX());

@@ -7,7 +7,6 @@ import net.minecraft.network.chat.Component;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import org.lwjgl.glfw.GLFW;
 
 public final class WebGUIClientForgeEvents {
@@ -23,11 +22,6 @@ public final class WebGUIClientForgeEvents {
         WebHudOverlay.tickCursor(client);
         WebGUIKeys.tick(client);
         WebviewClientBridge.tick(client);
-    }
-
-    @SubscribeEvent
-    public void onRenderGui(RenderGuiEvent.Post event) {
-        WebHudOverlay.onRender(event.getGuiGraphics(), event.getPartialTick().getGameTimeDeltaPartialTick(true));
     }
 
     @SubscribeEvent
