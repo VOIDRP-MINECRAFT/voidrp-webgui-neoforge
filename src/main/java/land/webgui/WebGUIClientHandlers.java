@@ -1,6 +1,6 @@
 package land.webgui;
 
-import land.webgui.compat.Compat;
+import land.webgui.compat.ClientCompat;
 
 import com.cinemamod.mcef.MCEF;
 import com.cinemamod.mcef.MCEFBrowser;
@@ -14,7 +14,7 @@ public final class WebGUIClientHandlers {
         Minecraft client = Minecraft.getInstance();
         if (!WebHudOverlay.shouldDeliverHudBrowserInput(client)) return;
         var win = client.getWindow();
-        if (Compat.windowHandle(win) != window) return;
+        if (ClientCompat.windowHandle(win) != window) return;
         MCEFBrowser browser = WebSession.browser();
         if (browser == null) return;
         browser.sendMouseMove((int) x, (int) y);
@@ -39,7 +39,7 @@ public final class WebGUIClientHandlers {
         String u = payload.url() == null || payload.url().isBlank() ? StartUrls.primary() : payload.url();
         if (payload.displayMode() == WebviewNetworking.MODE_GUI) {
             WebGUIMod.LOGGER.info("[WebGUI] Opening WebViewScreen: {}", u);
-            Compat.setScreen(client, new WebViewScreen(u));
+            ClientCompat.setScreen(client, new WebViewScreen(u));
         } else if (payload.displayMode() == WebviewNetworking.MODE_HUD) {
             WebGUIMod.LOGGER.info("[WebGUI] Applying server HUD: {}", u);
             WebHudOverlay.applyServerOpen(client, u);

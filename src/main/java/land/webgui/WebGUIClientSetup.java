@@ -1,6 +1,6 @@
 package land.webgui;
 
-import land.webgui.compat.Compat;
+import land.webgui.compat.ClientCompat;
 
 import net.minecraft.client.KeyMapping;
 import net.neoforged.api.distmarker.Dist;
@@ -41,9 +41,9 @@ public final class WebGUIClientSetup {
 
     @SubscribeEvent
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
-        Compat.registerKeyCategory(event);
-        keyMainMenu = Compat.keyMapping("key.webgui.main_menu", GLFW.GLFW_KEY_F6);
-        keyHudInteractive = Compat.keyMapping("key.webgui.hud_interactive", GLFW.GLFW_KEY_GRAVE_ACCENT);
+        ClientCompat.registerKeyCategory(event);
+        keyMainMenu = ClientCompat.keyMapping("key.webgui.main_menu", GLFW.GLFW_KEY_F6);
+        keyHudInteractive = ClientCompat.keyMapping("key.webgui.hud_interactive", GLFW.GLFW_KEY_GRAVE_ACCENT);
         event.register(keyMainMenu);
         event.register(keyHudInteractive);
     }

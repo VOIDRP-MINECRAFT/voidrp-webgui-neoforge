@@ -1,6 +1,6 @@
 package land.webgui;
 
-import land.webgui.compat.Compat;
+import land.webgui.compat.ClientCompat;
 
 import com.cinemamod.mcef.MCEFBrowser;
 import net.minecraft.client.Minecraft;
@@ -24,27 +24,27 @@ public final class WebHudOverlay {
 
     public static boolean shouldDeliverHudBrowserInput(Minecraft client) {
         if (client == null || !McefBridge.isMcefInitialized()) return false;
-        if (!hudVisible || !hudInteractive || Compat.screen(client) != null) return false;
+        if (!hudVisible || !hudInteractive || ClientCompat.screen(client) != null) return false;
         if (WebSession.mode() != WebSession.Mode.HUD_OVERLAY) return false;
         return WebSession.browser() != null;
     }
 
     public static boolean shouldForwardHudArrowKeys(Minecraft client) {
         if (client == null || !McefBridge.isMcefInitialized()) return false;
-        if (!hudVisible || Compat.screen(client) != null) return false;
+        if (!hudVisible || ClientCompat.screen(client) != null) return false;
         if (hudInteractive) return false;
         if (WebSession.mode() != WebSession.Mode.HUD_OVERLAY) return false;
         return WebSession.browser() != null;
     }
 
     public static boolean shouldBlockVanillaWorldInteractions(Minecraft client) {
-        if (client == null || Compat.screen(client) != null) return false;
+        if (client == null || ClientCompat.screen(client) != null) return false;
         if (!hudVisible || !hudInteractive) return false;
         return client.level != null;
     }
 
     public static void tickCursor(Minecraft client) {
-        if (Compat.screen(client) != null) return;
+        if (ClientCompat.screen(client) != null) return;
         if (!hudVisible) {
             if (cursorUnlockedForWebHud) {
                 client.mouseHandler.grabMouse();
@@ -65,8 +65,8 @@ public final class WebHudOverlay {
 
     public static void applyServerOpen(Minecraft client, String url) {
         String u = url == null || url.isBlank() ? StartUrls.primary() : url;
-        if (Compat.screen(client) != null) {
-            Compat.setScreen(client, null);
+        if (ClientCompat.screen(client) != null) {
+            ClientCompat.setScreen(client, null);
         }
         restoreHudAfterGuiClose = false;
         hudVisible = true;
@@ -79,7 +79,7 @@ public final class WebHudOverlay {
     }
 
     public static void toggleHud(Minecraft client) {
-        if (Compat.screen(client) instanceof WebViewScreen) return;
+        if (ClientCompat.screen(client) instanceof WebViewScreen) return;
         if (!McefBridge.isMcefInitialized()) {
             notifyMcefMissing(client);
             return;
@@ -106,7 +106,7 @@ public final class WebHudOverlay {
 
     public static void toggleInteractive(Minecraft client) {
         if (!McefBridge.isMcefInitialized()) return;
-        if (!hudVisible || Compat.screen(client) != null) return;
+        if (!hudVisible || ClientCompat.screen(client) != null) return;
         hudInteractive = !hudInteractive;
         if (hudInteractive) {
             client.mouseHandler.releaseMouse();

@@ -1,6 +1,6 @@
 package land.webgui;
 
-import land.webgui.compat.Compat;
+import land.webgui.compat.ClientCompat;
 
 import com.cinemamod.mcef.MCEF;
 import net.minecraft.client.Minecraft;
@@ -18,19 +18,19 @@ public final class WebGUIKeys {
             tryOpenMainMenu(client);
         }
         while (keyHudInteractive.consumeClick()) {
-            if (!WebHudOverlay.isHudVisible() || Compat.screen(client) != null) continue;
+            if (!WebHudOverlay.isHudVisible() || ClientCompat.screen(client) != null) continue;
             WebHudOverlay.toggleInteractive(client);
         }
     }
 
     private static void tryOpenMainMenu(Minecraft client) {
-        if (Compat.screen(client) instanceof WebViewScreen) return;
+        if (ClientCompat.screen(client) instanceof WebViewScreen) return;
         if (!MCEF.isInitialized()) {
             if (client.player != null) {
                 client.player.sendSystemMessage(Component.translatable("message.webgui.mcef_not_ready"));
             }
             return;
         }
-        Compat.setScreen(client, new WebViewScreen(WebGUIMainMenuUrl.getUrl()));
+        ClientCompat.setScreen(client, new WebViewScreen(WebGUIMainMenuUrl.getUrl()));
     }
 }

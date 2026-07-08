@@ -1,6 +1,6 @@
 package land.webgui;
 
-import land.webgui.compat.Compat;
+import land.webgui.compat.ClientCompat;
 
 import com.cinemamod.mcef.MCEF;
 import com.cinemamod.mcef.MCEFBrowser;
@@ -63,8 +63,8 @@ public final class WebviewPageToClientBridge {
             case "close" -> {
                 Minecraft mc = Minecraft.getInstance();
                 mc.execute(() -> {
-                    if (Compat.screen(mc) instanceof WebViewScreen) {
-                        Compat.screen(mc).onClose();
+                    if (ClientCompat.screen(mc) instanceof WebViewScreen) {
+                        ClientCompat.screen(mc).onClose();
                     } else if (WebHudOverlay.isHudVisible()) {
                         WebHudOverlay.toggleHud(mc);
                     }
@@ -75,7 +75,7 @@ public final class WebviewPageToClientBridge {
                 if (url != null && !url.isBlank()) {
                     final String finalUrl = url;
                     Minecraft mc = Minecraft.getInstance();
-                    mc.execute(() -> Compat.setScreen(mc, new WebViewScreen(finalUrl)));
+                    mc.execute(() -> ClientCompat.setScreen(mc, new WebViewScreen(finalUrl)));
                 }
             }
             case "open_hud" -> {
@@ -125,7 +125,7 @@ public final class WebviewPageToClientBridge {
     }
 
     private static void sendToServer(String channel, String jsonPayload) {
-        Compat.sendToServer(new WebviewPayloads.WebviewPageEventC2SPayload(channel, jsonPayload));
+        ClientCompat.sendToServer(new WebviewPayloads.WebviewPageEventC2SPayload(channel, jsonPayload));
     }
 
     private static void log(String level, String msg) {
