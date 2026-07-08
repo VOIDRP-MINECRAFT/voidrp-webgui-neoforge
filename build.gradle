@@ -51,9 +51,14 @@ repositories {
 }
 
 dependencies {
-    // MCEF (Chromium Embedded Framework) — bundled Fabric jar, used only for compilation.
-    // At runtime, Connector loads the MCEF Fabric jar from the mods folder.
-    compileOnly files('libs/mcef-keksuccino.jar')
+    // MCEF (Chromium Embedded Framework) — jar только для компиляции.
+    // 1.21.1: Fabric-сборка, в рантайме её грузит Connector из mods.
+    // 26.2:   нативная NeoForge-сборка keksuccino (кладётся в mods как обычный мод).
+    if (mcVer == '26.2') {
+        compileOnly files('libs/mcef-keksuccino-neoforge-26.2.jar')
+    } else {
+        compileOnly files('libs/mcef-keksuccino.jar')
+    }
 }
 
 tasks.withType(ProcessResources).configureEach {
