@@ -3,6 +3,7 @@
   "key.webgui.main_menu": "Открыть главное меню (F6)",
   "key.webgui.hud_interactive": "Взаимодействие с HUD",
   "key.webgui.hud_slide": "Скрыть/показать HUD",
+  "key.webgui.hud_notify": "Открыть уведомление",
   "screen.webgui.title": "WebGUI",
   "message.webgui.mcef_not_ready": "Встроенный браузер ещё не готов. Подождите немного и попробуйте снова."
 }

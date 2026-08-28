@@ -3,6 +3,7 @@
   "key.webgui.main_menu": "Open Main Menu (F6)",
   "key.webgui.hud_interactive": "Toggle HUD Interaction",
   "key.webgui.hud_slide": "Hide/Show HUD",
+  "key.webgui.hud_notify": "Open Notification",
   "screen.webgui.title": "WebGUI",
   "message.webgui.mcef_not_ready": "In-game browser is not ready yet. Please wait a moment and try again."
 }

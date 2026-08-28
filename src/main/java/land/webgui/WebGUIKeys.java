@@ -13,6 +13,7 @@ public final class WebGUIKeys {
         var keyMainMenu = WebGUIClientSetup.keyMainMenu();
         var keyHudInteractive = WebGUIClientSetup.keyHudInteractive();
         var keyHudSlide = WebGUIClientSetup.keyHudSlide();
+        var keyHudNotify = WebGUIClientSetup.keyHudNotify();
         if (keyMainMenu == null || keyHudInteractive == null) return;
 
         while (keyMainMenu.consumeClick()) {
@@ -25,6 +26,10 @@ public final class WebGUIKeys {
         while (keyHudSlide != null && keyHudSlide.consumeClick()) {
             if (!WebHudOverlay.isHudVisible() || ClientCompat.screen(client) != null) continue;
             WebHudOverlay.toggleSlide(client);
+        }
+        while (keyHudNotify != null && keyHudNotify.consumeClick()) {
+            if (!WebHudOverlay.isHudVisible() || ClientCompat.screen(client) != null) continue;
+            WebHudOverlay.notifyAct(client);
         }
     }
 

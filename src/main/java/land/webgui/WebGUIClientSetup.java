@@ -16,6 +16,7 @@ public final class WebGUIClientSetup {
     private static KeyMapping keyMainMenu;
     private static KeyMapping keyHudInteractive;
     private static KeyMapping keyHudSlide;
+    private static KeyMapping keyHudNotify;
 
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
@@ -46,9 +47,11 @@ public final class WebGUIClientSetup {
         keyMainMenu = ClientCompat.keyMapping("key.webgui.main_menu", GLFW.GLFW_KEY_F6);
         keyHudInteractive = ClientCompat.keyMapping("key.webgui.hud_interactive", GLFW.GLFW_KEY_GRAVE_ACCENT);
         keyHudSlide = ClientCompat.keyMapping("key.webgui.hud_slide", GLFW.GLFW_KEY_RIGHT);
+        keyHudNotify = ClientCompat.keyMapping("key.webgui.hud_notify", GLFW.GLFW_KEY_UP);
         event.register(keyMainMenu);
         event.register(keyHudInteractive);
         event.register(keyHudSlide);
+        event.register(keyHudNotify);
     }
 
     public static KeyMapping keyMainMenu() {
@@ -61,5 +64,9 @@ public final class WebGUIClientSetup {
 
     public static KeyMapping keyHudSlide() {
         return keyHudSlide;
+    }
+
+    public static KeyMapping keyHudNotify() {
+        return keyHudNotify;
     }
 }

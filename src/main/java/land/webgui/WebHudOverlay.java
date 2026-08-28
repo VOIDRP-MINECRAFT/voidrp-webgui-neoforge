@@ -120,6 +120,19 @@ public final class WebHudOverlay {
         } catch (Throwable ignored) {}
     }
 
+    /** Act on the newest notification toast (the "Open notification" keybind). */
+    public static void notifyAct(Minecraft client) {
+        MCEFBrowser browser = WebSession.hudBrowser();
+        if (browser == null) return;
+        try {
+            String url = browser.getURL();
+            browser.executeJavaScript(
+                "try{if(window.__voidNotifyAct)window.__voidNotifyAct();"
+                    + "else window.dispatchEvent(new CustomEvent('webgui:notifyAct'));}catch(e){}",
+                url != null ? url : "", 0);
+        } catch (Throwable ignored) {}
+    }
+
     public static void toggleInteractive(Minecraft client) {
         if (!McefBridge.isMcefInitialized()) return;
         if (!hudVisible || ClientCompat.screen(client) != null) return;
