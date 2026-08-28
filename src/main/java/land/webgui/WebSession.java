@@ -15,6 +15,17 @@ public final class WebSession {
     public static MCEFBrowser browser() { return browser; }
     public static Mode mode() { return mode; }
 
+    /**
+     * Append a per-open cache-buster so CEF always fetches the latest HTML (which references
+     * the newest hashed JS/CSS — those stay cached). Applied to EVERY page open (menu, HUD,
+     * command-opened webgui pages, notification open_gui …), so a fresh frontend build shows
+     * up without any nginx/plugin change. The single knob for "always serve the latest build".
+     */
+    private static String cacheBust(String url) {
+        if (url == null || url.isBlank()) return url;
+        return url + (url.contains("?") ? "&" : "?") + "_v=" + System.currentTimeMillis();
+    }
+
     public static MCEFBrowser hudBrowser() {
         if (mode == Mode.HUD_OVERLAY) return browser;
         if (mode == Mode.GUI_SCREEN) return suspendedHudBrowser;
@@ -57,7 +68,7 @@ public final class WebSession {
         } else {
             closeActiveBrowser();
         }
-        browser = MCEF.createBrowser(url, true);
+        browser = MCEF.createBrowser(cacheBust(url), true);
         mode = Mode.GUI_SCREEN;
         WebviewClientBridge.clearCache();
         return browser;
@@ -66,12 +77,12 @@ public final class WebSession {
     public static MCEFBrowser openForHud(String url) {
         closeSuspendedHudBrowser();
         if (mode == Mode.HUD_OVERLAY && browser != null) {
-            browser.loadURL(url);
+            browser.loadURL(cacheBust(url));
             WebviewClientBridge.clearCache();
             return browser;
         }
         closeActiveBrowser();
-        browser = MCEF.createBrowser(url, true);
+        browser = MCEF.createBrowser(cacheBust(url), true);
         mode = Mode.HUD_OVERLAY;
         WebviewClientBridge.clearCache();
         return browser;
