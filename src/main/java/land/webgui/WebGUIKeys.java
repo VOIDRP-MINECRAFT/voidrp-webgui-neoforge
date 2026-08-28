@@ -3,6 +3,7 @@ package land.webgui;
 import land.webgui.compat.ClientCompat;
 
 import com.cinemamod.mcef.MCEF;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
@@ -12,8 +13,7 @@ public final class WebGUIKeys {
     public static void tick(Minecraft client) {
         var keyMainMenu = WebGUIClientSetup.keyMainMenu();
         var keyHudInteractive = WebGUIClientSetup.keyHudInteractive();
-        var keyHudSlide = WebGUIClientSetup.keyHudSlide();
-        var keyHudNotify = WebGUIClientSetup.keyHudNotify();
+        var keyHudReload = WebGUIClientSetup.keyHudReload();
         if (keyMainMenu == null || keyHudInteractive == null) return;
 
         while (keyMainMenu.consumeClick()) {
@@ -23,13 +23,23 @@ public final class WebGUIKeys {
             if (!WebHudOverlay.isHudVisible() || ClientCompat.screen(client) != null) continue;
             WebHudOverlay.toggleInteractive(client);
         }
-        while (keyHudSlide != null && keyHudSlide.consumeClick()) {
-            if (!WebHudOverlay.isHudVisible() || ClientCompat.screen(client) != null) continue;
-            WebHudOverlay.toggleSlide(client);
+        // Reload the active webview, bypassing cache (dev loop / stuck page). Works for the HUD
+        // or an open WebViewScreen.
+        if (keyHudReload != null) {
+            while (keyHudReload.consumeClick()) WebSession.reloadActive();
         }
-        while (keyHudNotify != null && keyHudNotify.consumeClick()) {
+
+        // Emit-to-page HUD hotkeys — each just fires a `webgui:<event>` the page reacts to.
+        // Add a new one: register a KeyMapping in WebGUIClientSetup + one line here.
+        emitHudKey(WebGUIClientSetup.keyHudSlide(),  "hudSlide",  client);
+        emitHudKey(WebGUIClientSetup.keyHudNotify(), "notifyAct", client);
+    }
+
+    private static void emitHudKey(KeyMapping key, String event, Minecraft client) {
+        if (key == null) return;
+        while (key.consumeClick()) {
             if (!WebHudOverlay.isHudVisible() || ClientCompat.screen(client) != null) continue;
-            WebHudOverlay.notifyAct(client);
+            WebviewClientEmit.dispatch(event, null);
         }
     }
 

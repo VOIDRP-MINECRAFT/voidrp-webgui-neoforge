@@ -4,6 +4,7 @@
   "key.webgui.hud_interactive": "Взаимодействие с HUD",
   "key.webgui.hud_slide": "Скрыть/показать HUD",
   "key.webgui.hud_notify": "Открыть уведомление",
+  "key.webgui.hud_reload": "Перезагрузить страницу (WebGUI)",
   "screen.webgui.title": "WebGUI",
   "message.webgui.mcef_not_ready": "Встроенный браузер ещё не готов. Подождите немного и попробуйте снова."
 }

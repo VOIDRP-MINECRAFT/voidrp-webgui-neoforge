@@ -92,4 +92,18 @@ public final class WebSession {
         if (mode == Mode.HUD_OVERLAY) { closeActiveBrowser(); mode = Mode.NONE; }
         closeSuspendedHudBrowser();
     }
+
+    /** Reload the active webview, bypassing the cache (dev convenience / stuck-page escape). */
+    public static void reloadActive() {
+        MCEFBrowser b = browser;
+        if (b == null) return;
+        try {
+            b.reloadIgnoreCache();
+        } catch (Throwable t) {
+            // Fallback for MCEF forks without reloadIgnoreCache: re-load with a fresh buster.
+            String u = b.getURL();
+            if (u != null && !u.isBlank()) b.loadURL(cacheBust(u.replaceAll("[?&]_v=\\d+", "")));
+        }
+        WebviewClientBridge.clearCache();
+    }
 }
