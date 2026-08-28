@@ -12,6 +12,7 @@ public final class WebGUIKeys {
     public static void tick(Minecraft client) {
         var keyMainMenu = WebGUIClientSetup.keyMainMenu();
         var keyHudInteractive = WebGUIClientSetup.keyHudInteractive();
+        var keyHudSlide = WebGUIClientSetup.keyHudSlide();
         if (keyMainMenu == null || keyHudInteractive == null) return;
 
         while (keyMainMenu.consumeClick()) {
@@ -20,6 +21,10 @@ public final class WebGUIKeys {
         while (keyHudInteractive.consumeClick()) {
             if (!WebHudOverlay.isHudVisible() || ClientCompat.screen(client) != null) continue;
             WebHudOverlay.toggleInteractive(client);
+        }
+        while (keyHudSlide != null && keyHudSlide.consumeClick()) {
+            if (!WebHudOverlay.isHudVisible() || ClientCompat.screen(client) != null) continue;
+            WebHudOverlay.toggleSlide(client);
         }
     }
 

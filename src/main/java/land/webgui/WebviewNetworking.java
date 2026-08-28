@@ -89,7 +89,10 @@ public final class WebviewNetworking {
     }
 
     public static void sendMainMenuUrl(ServerPlayer player, String url) {
-        PacketDistributor.sendToPlayer(player, new WebviewPayloads.WebUIMainMenuPayload(sanitizeUrl(url)));
+        // Sign the F6 menu URL so it carries ?webgui_token=. In-page navigation from
+        // the menu (router) then reuses that token for the target game-ui pages — the
+        // run_command bridge doesn't execute plugin commands on this hybrid server.
+        PacketDistributor.sendToPlayer(player, new WebviewPayloads.WebUIMainMenuPayload(withPlayerToken(player, url)));
     }
 
     private static String withPlayerToken(ServerPlayer player, String url) {
