@@ -1,7 +1,6 @@
-# 🖥️ VoidRP WebGUI NeoForge
+<p align="center"><img src=".github/assets/banner.jpg" alt="VoidRP WebGUI NeoForge" width="100%"></p>
 
-> NeoForge-мод (клиент + сервер): встроенный Chromium (MCEF) в клиенте Minecraft — страницы сайта и HUD поверх игры,
-> события между сервером и страницей, горячие клавиши.
+<div align="center">
 
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen?logo=minecraft)
 ![NeoForge](https://img.shields.io/badge/NeoForge-21.1.232-orange)
@@ -10,6 +9,32 @@
 ![Version](https://img.shields.io/badge/mod_version-1.3.0-green)
 [![Build](https://github.com/VOIDRP-MINECRAFT/voidrp-webgui-neoforge/actions/workflows/build.yml/badge.svg)](https://github.com/VOIDRP-MINECRAFT/voidrp-webgui-neoforge/actions/workflows/build.yml)
 ![License](https://img.shields.io/badge/license-proprietary-red)
+
+</div>
+
+> NeoForge-мод (клиент + сервер): встроенный Chromium (MCEF) в клиенте Minecraft — страницы сайта и HUD поверх игры,
+> события между сервером и страницей, горячие клавиши.
+
+---
+
+## 📸 Как это выглядит
+
+Страницы, которые мод открывает поверх игры во встроенном Chromium, — это `/game-ui/*` из [voidrp-site](https://github.com/VOIDRP-MINECRAFT/voidrp-site):
+
+<p align="center"><img src=".github/assets/screenshots/game-ui-tour.gif" alt="Меню, боевой пропуск, квесты и рынок в WebGUI по очереди" width="100%"></p>
+
+<table>
+<tr>
+<td width="50%"><img src=".github/assets/screenshots/game-ui-menu.jpg" alt="Главное меню (F6): профиль, статистика, быстрый доступ"><br><sub>Главное меню (F6): профиль, статистика, быстрый доступ</sub></td>
+<td width="50%"><img src=".github/assets/screenshots/game-ui-battlepass.jpg" alt="Боевой пропуск: квесты дня и награды"><br><sub>Боевой пропуск: квесты дня и награды</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src=".github/assets/screenshots/game-ui-quests.jpg" alt="Ежедневные квесты"><br><sub>Ежедневные квесты</sub></td>
+<td width="50%"><img src=".github/assets/screenshots/game-ui-market.jpg" alt="Биржа: стакан ордеров и история цены"><br><sub>Биржа: стакан ордеров и история цены</sub></td>
+</tr>
+</table>
+
+<sub>Страницы сняты в браузере в разрешении 1600×900 на демо-данных; в игре их рисует MCEF поверх мира.</sub>
 
 ---
 
