@@ -1,31 +1,58 @@
 # 🖥️ VoidRP WebGUI NeoForge
 
-> Нативный NeoForge 1.21.1 серверный мод — управляет встроенным Chromium-браузером клиентов (MCEF), отправляет URL и события, принимает действия со страниц.
+> NeoForge-мод (клиент + сервер): встроенный Chromium (MCEF) в клиенте Minecraft — страницы сайта и HUD поверх игры,
+> события между сервером и страницей, горячие клавиши.
 
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen?logo=minecraft)
 ![NeoForge](https://img.shields.io/badge/NeoForge-21.1.232-orange)
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)
 ![MCEF](https://img.shields.io/badge/MCEF-Chromium_embedded-blue)
 ![Version](https://img.shields.io/badge/mod_version-1.3.0-green)
+[![Build](https://github.com/VOIDRP-MINECRAFT/voidrp-webgui-neoforge/actions/workflows/build.yml/badge.svg)](https://github.com/VOIDRP-MINECRAFT/voidrp-webgui-neoforge/actions/workflows/build.yml)
 ![License](https://img.shields.io/badge/license-proprietary-red)
 
 ---
 
 ## 🗺️ Место в экосистеме
 
+```mermaid
+flowchart LR
+    subgraph SRV["Сервер · Mohist (NeoForge + Paper)"]
+        WN["voidrp-webgui-neoforge<br/>каналы .optional()"]
+        GS["voidrp-gamesync-plugin<br/>WebGuiBridgeService<br/>signUrl → webgui_token"]
+    end
+    subgraph CL["Клиент"]
+        WC["voidrp-webgui-neoforge<br/>экран, HUD, клавиши"]
+        MC["MCEF · Chromium<br/>(через Connector)"]
+    end
+    SITE["void-rp.ru/game-ui/*<br/>Vue 3"]
+    B[("minecraft-backend<br/>/api/v1/game-ui/*")]
+
+    GS -- "webgui:open_web<br/>webgui:set_main_menu" --> WC
+    WN -. "регистрирует каналы" .- GS
+    WC --> MC --> SITE
+    SITE -- "?webgui_token=HMAC" --> B
+    MC -- "postToServer / cefQuery" --> WN
+    WN -- "webgui:emit" --> MC
 ```
-  Minecraft Server (Mohist — NeoForge + Paper)
-  ├── voidrp-webgui-neoforge  ← этот мод (регистрирует каналы, шлёт URL)
-  └── voidrp-gamesync-plugin  ← WebGuiBridgeService (sendPluginMessage + signUrl)
-        │ Bukkit plugin channels: webgui:open_web / webgui:set_main_menu
-        ▼
-  Minecraft Client
-  ├── voidrp-webgui (NeoForge jar)  ← мод принимает пакеты, рендерит Chromium
-  └── mcef-keksuccino-2.2.0-fabric.jar  ← Connector грузит для CEF/Chromium
-        │ встроенный Chromium (MCEF)
-        ▼
-  void-rp.ru/game-ui/*  (Vue 3)  ←→  minecraft-backend (FastAPI)
-                                        webgui_token HMAC-SHA256
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor P as Игрок
+    participant S as Сервер (gamesync)
+    participant C as Клиент (webgui)
+    participant W as Страница /game-ui
+    participant B as Бэкенд
+    P->>S: /shop, NPC или клавиша F6
+    S->>S: signUrl(url) → webgui_token (HMAC-SHA256, TTL)
+    S->>C: webgui:open_web (GUI или HUD)
+    C->>W: открыть URL (+ _v=timestamp против кэша)
+    W->>B: /api/v1/game-ui/* с webgui_token
+    B-->>W: данные игрока
+    W->>C: postToServer("buy_clicked", …)
+    C->>S: событие страницы
+    S-->>W: WebviewApi.emitToPage("market:order_filled", …)
 ```
 
 **Ключевые детали архитектуры:**
@@ -75,6 +102,19 @@ postToGame({ channel: "open_gui", url: "https://void-rp.ru/game-ui#market" })
 postToGame({ channel: "open_hud", url: "https://void-rp.ru/game-ui/hud" })
 ```
 
+### Горячие клавиши (переназначаются в «Управлении»)
+
+| Клавиша | Действие |
+|---|---|
+| <kbd>F6</kbd> | Главное меню (URL задаёт сервер через `webgui:set_main_menu`) |
+| <kbd>`</kbd> | Взаимодействие с HUD (мышь в оверлей) |
+| <kbd>→</kbd> | Спрятать/показать HUD (анимация сдвига) |
+| <kbd>↑</kbd> | Открыть самое свежее уведомление HUD |
+| не назначена | Перезагрузить страницу WebGUI |
+
+Каждое открытие страницы получает параметр `_v=<время>`, поэтому после деплоя фронтенда игроки сразу видят
+новую версию, а хешированные JS/CSS по-прежнему берутся из кэша.
+
 ---
 
 ## 📋 Требования
@@ -85,6 +125,8 @@ postToGame({ channel: "open_hud", url: "https://void-rp.ru/game-ui/hud" })
 | NeoForge | 21.1.232 |
 | Java | 21 |
 | Mohist / Connector | для Fabric MCEF |
+
+Версионно-зависимый код лежит в `src/versions/v1211` и `src/versions/v262`; сборка под 26.2 — `./gradlew jar -PmcVer=26.2`.
 
 Клиентам необходим тот же `webgui-1.3.0+mc1.21.1.jar` + `mcef-keksuccino-2.2.0-1.21.1-fabric.jar` в лаунчер-паке.
 
