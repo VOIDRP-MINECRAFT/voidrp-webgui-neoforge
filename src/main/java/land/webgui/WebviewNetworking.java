@@ -2,6 +2,8 @@ package land.webgui;
 
 import land.webgui.server.WebviewServerConfig;
 import land.webgui.server.WebviewServerEvents;
+import land.webgui.server.WebviewAuthGate;
+import land.webgui.server.WebviewAuthWatcher;
 import land.webgui.server.WebviewSignedToken;
 import land.webgui.server.WebviewUrlBuilder;
 import net.minecraft.server.level.ServerPlayer;
@@ -54,6 +56,7 @@ public final class WebviewNetworking {
     }
 
     public static void openGui(ServerPlayer player, String url) {
+        if (refuseUnauthenticated(player)) return;
         WebGUIMod.LOGGER.info("[WebGUI] openGui → {} : {}", player.getName().getString(), url);
         clearEntityContext(player);
         PacketDistributor.sendToPlayer(player,
@@ -61,6 +64,7 @@ public final class WebviewNetworking {
     }
 
     public static void openHud(ServerPlayer player, String url) {
+        if (refuseUnauthenticated(player)) return;
         WebGUIMod.LOGGER.info("[WebGUI] openHud → {} : {}", player.getName().getString(), url);
         clearEntityContext(player);
         PacketDistributor.sendToPlayer(player,
@@ -68,6 +72,7 @@ public final class WebviewNetworking {
     }
 
     public static void openGuiForEntity(ServerPlayer player, String url, String entityJson) {
+        if (refuseUnauthenticated(player)) return;
         WebGUIMod.LOGGER.info("[WebGUI] openGuiForEntity → {} : {}", player.getName().getString(), url);
         sendEntityContext(player, entityJson);
         PacketDistributor.sendToPlayer(player,
@@ -92,10 +97,27 @@ public final class WebviewNetworking {
         // Sign the F6 menu URL so it carries ?webgui_token=. In-page navigation from
         // the menu (router) then reuses that token for the target game-ui pages — the
         // run_command bridge doesn't execute plugin commands on this hybrid server.
+        if (!WebviewAuthGate.allowed(player)) {
+            // Not logged in yet: overwrite whatever menu URL the client still holds (a signed one
+            // from an earlier session) with the bare page, and send the signed one once the login
+            // is confirmed (WebviewAuthWatcher).
+            WebviewAuthWatcher.waitFor(player, url);
+            PacketDistributor.sendToPlayer(player, new WebviewPayloads.WebUIMainMenuPayload(sanitizeUrl(url)));
+            return;
+        }
         PacketDistributor.sendToPlayer(player, new WebviewPayloads.WebUIMainMenuPayload(withPlayerToken(player, url)));
     }
 
+    /** Nothing opens before the auth bridge confirms the login (see WebviewAuthGate). */
+    private static boolean refuseUnauthenticated(ServerPlayer player) {
+        if (WebviewAuthGate.allowed(player)) return false;
+        WebGUIMod.LOGGER.info("[WebGUI] refused for {}: login not confirmed yet", player.getName().getString());
+        player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§cСначала подтвердите вход через лаунчер VoidRP — меню откроется после входа."));
+        return true;
+    }
+
     private static String withPlayerToken(ServerPlayer player, String url) {
+        if (!WebviewAuthGate.allowed(player)) return sanitizeUrl(url);   // never sign before the login is confirmed
         if (!WebviewServerConfig.enableTokens()) {
             WebGUIMod.LOGGER.info("[WebGUI] tokens disabled — sending URL without token");
             return sanitizeUrl(url);

@@ -16,6 +16,7 @@ public final class WebGUIMod {
         WebviewNetworking.register(modBus);
 
         NeoForge.EVENT_BUS.register(new WebGUIForgeEvents());
+        NeoForge.EVENT_BUS.register(new land.webgui.server.WebviewAuthWatcher());
 
         LOGGER.info("WebGUI (NeoForge) loaded — channels registered as optional.");
     }
