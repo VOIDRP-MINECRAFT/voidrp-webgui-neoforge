@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "client": [
     "CefUtilMixin",
+    "McefBrowserPaintMixin",
     "McefSettingsMixin"
   ],
   "minVersion": "0.8"
