@@ -29,4 +29,9 @@ public final class Compat {
     public static String dimensionId(Level level) {
         return level.dimension().identifier().toString();
     }
+
+    /** Scoreboard-style string tags of an entity (26.2 renamed getTags to entityTags). */
+    public static java.util.Set<String> entityTags(net.minecraft.world.entity.Entity entity) {
+        return entity.entityTags();
+    }
 }

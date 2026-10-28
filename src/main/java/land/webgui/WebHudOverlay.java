@@ -81,7 +81,7 @@ public final class WebHudOverlay {
     public static void toggleHud(Minecraft client) {
         if (ClientCompat.screen(client) instanceof WebViewScreen) return;
         if (!McefBridge.isMcefInitialized()) {
-            notifyMcefMissing(client);
+            hintMcefNotReady(client);
             return;
         }
         if (hudVisible) {
@@ -188,9 +188,8 @@ public final class WebHudOverlay {
         }
     }
 
-    private static void notifyMcefMissing(Minecraft client) {
-        if (client.player != null) {
-            client.player.sendSystemMessage(Component.translatable("message.webgui.mcef_not_ready"));
-        }
+    /** The browser is still starting: say so over the hotbar (a chat line per key press piled up). */
+    public static void hintMcefNotReady(Minecraft client) {
+        ClientCompat.actionBar(client, Component.translatable("message.webgui.mcef_not_ready"));
     }
 }

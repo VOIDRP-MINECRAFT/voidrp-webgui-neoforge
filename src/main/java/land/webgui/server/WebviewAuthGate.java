@@ -39,7 +39,8 @@ public final class WebviewAuthGate {
         if (!authBridgePresent()) return true;
         if (!resolve()) {
             // bridge present but its API changed: fail closed on the pending tag at least
-            return player.getTags().contains("voidrp_authenticated") && !player.getTags().contains("voidrp_auth_pending");
+            java.util.Set<String> tags = land.webgui.compat.Compat.entityTags(player);
+            return tags.contains("voidrp_authenticated") && !tags.contains("voidrp_auth_pending");
         }
         try {
             Object bootstrap = getBootstrap.invoke(null);

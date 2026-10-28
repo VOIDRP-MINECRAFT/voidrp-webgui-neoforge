@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
@@ -36,6 +37,11 @@ public final class ClientCompat {
     }
 
     /** GLFW-хэндл окна. */
+    /** Короткая строка над хотбаром (не в чат). В 26.2 — у игрока, Gui.setOverlayMessage убран. */
+    public static void actionBar(Minecraft client, Component message) {
+        if (client.player != null) client.player.sendOverlayMessage(message);
+    }
+
     public static long windowHandle(Window window) {
         return window.handle();
     }

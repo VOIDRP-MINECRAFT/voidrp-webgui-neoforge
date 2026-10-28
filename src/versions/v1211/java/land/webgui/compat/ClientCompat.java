@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -28,6 +29,11 @@ public final class ClientCompat {
     /** Отправка пейлоада с клиента на сервер. */
     public static void sendToServer(CustomPacketPayload payload) {
         PacketDistributor.sendToServer(payload);
+    }
+
+    /** Короткая строка над хотбаром (не в чат). */
+    public static void actionBar(Minecraft client, Component message) {
+        client.gui.setOverlayMessage(message, false);
     }
 
     /** GLFW-хэндл окна. */

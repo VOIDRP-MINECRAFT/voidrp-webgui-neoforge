@@ -11,6 +11,7 @@ public final class WebGUIKeys {
     private WebGUIKeys() {}
 
     public static void tick(Minecraft client) {
+        WebGUIClientHandlers.tickPendingOpen(client);
         var keyMainMenu = WebGUIClientSetup.keyMainMenu();
         var keyHudInteractive = WebGUIClientSetup.keyHudInteractive();
         var keyHudReload = WebGUIClientSetup.keyHudReload();
@@ -46,9 +47,7 @@ public final class WebGUIKeys {
     private static void tryOpenMainMenu(Minecraft client) {
         if (ClientCompat.screen(client) instanceof WebViewScreen) return;
         if (!MCEF.isInitialized()) {
-            if (client.player != null) {
-                client.player.sendSystemMessage(Component.translatable("message.webgui.mcef_not_ready"));
-            }
+            WebHudOverlay.hintMcefNotReady(client);
             return;
         }
         ClientCompat.setScreen(client, new WebViewScreen(WebGUIMainMenuUrl.getUrl()));
