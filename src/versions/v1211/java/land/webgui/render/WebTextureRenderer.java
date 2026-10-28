@@ -15,6 +15,12 @@ public final class WebTextureRenderer {
     private WebTextureRenderer() {}
 
     public static void blitFullTexture(GuiGraphics context, int texId, int texW, int texH, int w, int h) {
+        // The HUD page is transparent: without blending its empty pixels (black, alpha 0) cover the
+        // whole screen. Blend used to be left on by whatever drew before us — when another overlay
+        // switched it off, the game flashed black frames. Set it ourselves, restore after.
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.disableDepthTest();
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, texId);
         var buf = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
@@ -24,5 +30,7 @@ public final class WebTextureRenderer {
         buf.addVertex(mat, w, 0, 0).setUv(1, 0);
         buf.addVertex(mat, 0, 0, 0).setUv(0, 0);
         BufferUploader.drawWithShader(buf.buildOrThrow());
+        RenderSystem.enableDepthTest();
+        RenderSystem.disableBlend();
     }
 }
