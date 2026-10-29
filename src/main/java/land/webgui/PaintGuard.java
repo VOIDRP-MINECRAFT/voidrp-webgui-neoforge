@@ -1,5 +1,6 @@
 package land.webgui;
 
+import land.webgui.render.FrameProbe;
 import org.lwjgl.opengl.GL11;
 
 import java.nio.ByteBuffer;
@@ -22,7 +23,7 @@ public final class PaintGuard {
     // Render thread only: corrections made by the renderer before a draw, and odd state it saw.
     public static int wrongUnit, wrongTexture, samplerBound, blendOff, blendFunc, depthOn;
     public static int foreignTarget, scissorOn, unpackLeft;
-    private static int draws;
+    private static int draws, uploads;
     private static long windowStart;
     private static boolean cleanReported;
 
@@ -65,6 +66,8 @@ public final class PaintGuard {
      * defaults back (render thread, right after the upload).
      */
     public static void resetUnpackState() {
+        FrameProbe.onPictureUploaded();
+        uploads++;
         GL11.glPixelStorei(GL11.GL_UNPACK_ROW_LENGTH, 0);
         GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_PIXELS, 0);
         GL11.glPixelStorei(GL11.GL_UNPACK_SKIP_ROWS, 0);
@@ -85,17 +88,17 @@ public final class PaintGuard {
         int fixed = wrongUnit + wrongTexture + samplerBound + blendOff + blendFunc + depthOn;
         int seen = foreignTarget + scissorOn + unpackLeft;
         if (dropped > 0 || fixed > 0 || seen > 0) {
-            WebGUIMod.LOGGER.warn("[WebGUI] last {}s: {} draws, {} browser pictures, {} solid black dropped; "
+            WebGUIMod.LOGGER.warn("[WebGUI] last {}s: {} draws, {} browser pictures ({} uploaded), {} solid black dropped; "
                             + "GL corrected before drawing: texture unit {}, texture {}, sampler {}, blend off {}, "
                             + "blend func {}, depth test {}; seen: other framebuffer {}, scissor {}, unpack state {}",
-                    seconds, draws, got, dropped, wrongUnit, wrongTexture, samplerBound, blendOff,
+                    seconds, draws, got, uploads, dropped, wrongUnit, wrongTexture, samplerBound, blendOff,
                     blendFunc, depthOn, foreignTarget, scissorOn, unpackLeft);
         } else if (!cleanReported) {
-            WebGUIMod.LOGGER.info("[WebGUI] browser drawing checked: {} draws, {} browser pictures in {}s, "
-                    + "no black pictures, GL state as expected", draws, got, seconds);
+            WebGUIMod.LOGGER.info("[WebGUI] browser drawing checked: {} draws, {} browser pictures ({} uploaded) in {}s, "
+                    + "no black pictures, GL state as expected", draws, got, uploads, seconds);
             cleanReported = true;
         }
-        draws = 0;
+        draws = uploads = 0;
         wrongUnit = wrongTexture = samplerBound = blendOff = blendFunc = depthOn = 0;
         foreignTarget = scissorOn = unpackLeft = 0;
         windowStart = now;

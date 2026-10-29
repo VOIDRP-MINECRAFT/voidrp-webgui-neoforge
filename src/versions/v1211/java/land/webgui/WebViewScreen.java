@@ -2,6 +2,7 @@ package land.webgui;
 
 import com.cinemamod.mcef.MCEF;
 import com.cinemamod.mcef.MCEFBrowser;
+import land.webgui.render.FrameProbe;
 import land.webgui.render.WebTextureRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -99,6 +100,8 @@ public class WebViewScreen extends Screen {
                 WebTextureRenderer.blitFullTexture(context, texId,
                         this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight(),
                         getBrowserWidth(), getBrowserHeight());
+                FrameProbe.afterMenuDraw(texId, browser.getRenderer().getTextureWidth(),
+                        browser.getRenderer().getTextureHeight());
             }
         }
     }
